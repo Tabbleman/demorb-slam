@@ -49,7 +49,8 @@ include_directories(${CSPARSE_INCLUDE_DIR})
 add_library(DEMO SHARED 
   ${PROJECT_SOURCE_DIR}/src/frame.cc 
   ${PROJECT_SOURCE_DIR}/src/mappoint.cc 
-  # ${PROJECT_SOURCE_DIR}/src/map.cc 
+  ${PROJECT_SOURCE_DIR}/src/map.cc
+#  ${PROJECT_SOURCE_DIR}/src/frontend.cc
 )
 
 target_link_libraries(
@@ -65,3 +66,6 @@ target_link_libraries(
   ${CSPARSE_LIBRARY}
 
 )
+
+add_executable(runkitti ${PROJECT_SOURCE_DIR}/app/runkitti.cc)
+target_link_libraries(runkitti DEMO)
