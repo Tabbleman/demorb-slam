@@ -50,7 +50,7 @@ add_library(DEMO SHARED
   ${PROJECT_SOURCE_DIR}/src/frame.cc 
   ${PROJECT_SOURCE_DIR}/src/mappoint.cc 
   ${PROJECT_SOURCE_DIR}/src/map.cc
-#  ${PROJECT_SOURCE_DIR}/src/frontend.cc
+  ${PROJECT_SOURCE_DIR}/src/frontend.cc
 )
 
 target_link_libraries(

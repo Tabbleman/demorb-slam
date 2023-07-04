@@ -27,7 +27,7 @@ namespace demo {
         void SetMap(Map::Ptr map) {map_ = map; }
 
         void SetBackend(std::shared_ptr<Backend> backend){backend_ = backend;}
-        void SetCamera(Camera::Ptr left, Camera::Ptr){camera_right_ }
+        void SetCamera(Camera::Ptr left, Camera::Ptr right){camera_left_ = left, camera_right_ = right;}
     private:
         /**
          * track in normal mode
@@ -111,6 +111,11 @@ namespace demo {
 
         int tracking_inliers_ = 0;
 
+        int num_features_ = 150;
+        int num_features_init = 0;
+        int num_features_tracking_good_ = 50;
+        int num_features_tracking_bad_ = 20;
+        int num_features_needed_for_keyframes = 0;
         //parameters
         cv::Ptr<cv::FastFeatureDetector> ff_;
 

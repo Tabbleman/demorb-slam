@@ -11,7 +11,9 @@ namespace demo {
     struct Feature {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
         typedef std::shared_ptr<Feature> Ptr;
+
         std::weak_ptr<Frame> frame_;        //持有该特征的帧，由于避免智能指针的相互引用，使用weak_ptr
         cv::KeyPoint position_;             // 2d提取位置
         std::weak_ptr<MapPoint> map_point_; //关联地图点

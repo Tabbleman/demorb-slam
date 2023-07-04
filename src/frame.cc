@@ -10,7 +10,7 @@ Frame::Ptr Frame::CreateFrame() {
   Frame::Ptr newFrame(new Frame);
   newFrame->id_ = factory_id++;
 }
-void Frame::setKeyFrame() {
+void Frame::SetKeyFrame() {
   static long keyframe_factory_id = 0;
   is_keyframe_ = true;
   keyframe_id_ = keyframe_factory_id++;

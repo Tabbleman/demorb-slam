@@ -40,12 +40,12 @@ namespace demo {
           return pose_;
         }
 
-        void setPose(const Sophus::SE3d &pose) {
+        void SetPose(const Sophus::SE3d &pose) {
           std::unique_lock<std::mutex> lck(pose_mutex_);
           pose_ = pose;
         }
 
-        void setKeyFrame();
+        void SetKeyFrame();
 
         static std::shared_ptr<Frame> CreateFrame();
     };
