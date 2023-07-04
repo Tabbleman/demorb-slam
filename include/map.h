@@ -28,12 +28,12 @@ public:
     return keyframes_;
   }
   //获取激活的路标点
-  void GetActiveMapPoint(){
+  LandmarksType GetActiveMapPoint(){
     std::unique_lock<std::mutex> lck(data_mutex_);
     return active_landmarks_;
   }
   //获取激活的关键帧
-  void GetActiveKeyFrame(){
+  KeyFrameType GetActiveKeyFrame(){
     std::unique_lock<std::mutex> lck(data_mutex_);
     return active_keyframe_;
   }
@@ -49,7 +49,7 @@ private:
   Frame::Ptr current_frame_ = nullptr;
   //settings 激活关键帧的数量
   int num_active_keyframe_ = 7;
-}
+};
 
 } // namespace demo
 
