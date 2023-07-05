@@ -69,3 +69,6 @@ target_link_libraries(
 
 add_executable(runkitti ${PROJECT_SOURCE_DIR}/app/runkitti.cc)
 target_link_libraries(runkitti DEMO)
+
+add_subdirectory(test)
+

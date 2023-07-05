@@ -1,0 +1,2 @@
+add_executable(test_triangulation test_triangulation.cc)
+target_link_libraries(test_triangulation DEMO)

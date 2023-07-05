@@ -4,7 +4,7 @@
 #include "opencv2/features2d.hpp"
 #include "frame.h"
 #include "map.h"
-
+#include "utils.h"
 namespace demo {
     class Backend;
     class Viewer;
@@ -98,7 +98,7 @@ namespace demo {
         //data
         FrontendStatus status_ = FrontendStatus::INITING;
 
-        Frame::Ptr currenf_frame_ = nullptr;
+        Frame::Ptr current_frame_ = nullptr;
         Frame::Ptr last_frame_ = nullptr;
         Camera::Ptr camera_left_ = nullptr;
         Camera::Ptr camera_right_ = nullptr;
