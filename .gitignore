@@ -12,5 +12,6 @@ _deps
 build/*
 .vscode/*
 cmake-build-debug/
+*.so
 bin/*
 lib/*

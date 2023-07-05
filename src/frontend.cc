@@ -1,7 +1,8 @@
 #include "frontend.h"
 #include "feature.h"
 #include "map.h"
-
+#include "opencv2/opencv.hpp"
+#include "opencv2/features2d.hpp"
 namespace demo{
     bool Frontend::AddFrame(Frame::Ptr frame) {
         current_frame_ = frame;
@@ -110,8 +111,92 @@ namespace demo{
     }
 
     int Frontend::EstimateCurrentPose() {
-//        typedef
+//        TODO
+    }
+    /**
+     * 跟踪上一帧
+     * @return
+     */
+    int Frontend::TrackLastFrame() {
+//        std::vector<cv::Point2f> kp_last, kp_currrent;
+//        for(auto &kp: last_frame_->feature_left_){
+//            if(kp->map_point_.lock()){
+//                auto mp = kp->map_point_.lock();
+//                auto px =
+//                        camera_left_->world2pixel(mp->pos_, current_frame_->Pose());
+//                kp_last.push_back(kp->position_.pt);
+//                kp_currrent.push_back(cv::Point2f(px[0], px[1]));
+//
+//            }else {
+//                kp_last.push_back(kp->position_.pt);
+//                kp_currrent.push_back(kp->position_.pt);
+//            }
+//        }
+        //orb extractor
+        //start initialization
+        int num_good_pts = 0;
+        std::vector<cv::KeyPoint> keypoint_last, keypoint_current;
+
+        cv::Mat descriptor_last, descriptor_current;
+
+        cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create();
+        cv::Ptr<cv::DescriptorExtractor> descriptor = cv::ORB::create();
+        cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("BruteForce-Hamming");
+
+        detector->detect(last_frame_->left_img_, keypoint_last);
+        detector->detect(current_frame_->left_img_, keypoint_current);
+
+        descriptor->compute(last_frame_->left_img_, keypoint_last, descriptor_last);
+        descriptor->compute(current_frame_->left_img_, keypoint_current, descriptor_current);
+
+        std::vector<cv::DMatch> matches;
+        matcher->match(descriptor_last, descriptor_current, matches);
+        auto cmp = [](const cv::DMatch &dm1, const cv::DMatch &dm2){return dm1.distance < dm2.distance;};
+        auto min_max = std::minmax_element(matches.begin(), matches.end(), cmp);
+        double min_dist = min_max.first->distance;
+        double max_dist = min_max.second->distance;
+
+        for(int i = 0; i < descriptor_current.rows; i ++){
+            cv::KeyPoint current_good = keypoint_current[matches[i].trainIdx];
+            if(matches[i].distance < std::max(min_dist * 2, 10.0)){
+                LOG(INFO) << "Good Match Found!";
+                demo::Feature::Ptr feature(new Feature(current_frame_, current_good));
+                feature->map_point_ = last_frame_->feature_left_[i]->map_point_;
+                current_frame_->feature_left_.push_back(feature);
+                num_good_pts ++;
+            }
+        }
+        LOG(INFO) << "Found " << num_good_pts << " Good in the last image";
+        return num_good_pts;
     }
 
-//    Frontend::
+    bool Frontend::StereoInit() {
+        int num_feature_left = DetectFeatures();
+        int num_coor_feature = FindFeaturesInRight();
+        if(num_coor_feature < num_features_init){
+            return false;
+        }
+
+        bool build_map_success = BuildInitMap();
+        if(build_map_success){
+            status_ = FrontendStatus::TRACKING_GOOD;
+            if(viewer_){
+//                TODO
+            }
+            return true;
+        }
+        return false;
+
+    }
+    int Frontend::DetectFeatures() {
+
+    }
+
+
+    bool Frontend::Reset() {
+        map_->CleanMap();
+
+        return true;
+    }
+
 }

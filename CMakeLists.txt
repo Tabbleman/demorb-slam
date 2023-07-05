@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 project(demoorb)
-
-set(CMAKE_CXX_STANDARD 14)
-
-
+set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -Wall")
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
@@ -15,7 +12,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories("/usr/include/eigen3")
 
 # OpenCV
-find_package(OpenCV 3.1 REQUIRED)
+find_package(OpenCV 3.4.5 EXACT)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 # pangolin
@@ -64,7 +61,6 @@ target_link_libraries(
   ${GFLAGS_LIBRARIES}
   pthread
   ${CSPARSE_LIBRARY}
-
 )
 
 add_executable(runkitti ${PROJECT_SOURCE_DIR}/app/runkitti.cc)

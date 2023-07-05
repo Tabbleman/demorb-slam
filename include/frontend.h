@@ -75,7 +75,7 @@ namespace demo {
          * Find corresponding features in right image of current frame;
          * @return num of features found
          */
-        int FindFeaturesInFight();
+        int FindFeaturesInRight();
 
 
         /**
