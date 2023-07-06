@@ -3,9 +3,8 @@
 #define DEMO_FRAME_H
 
 #include <common.h>
-#include <camera.h>
+
 namespace demo {
-    struct MapPoint;
     struct MapPoint;
     struct Feature;
 
@@ -36,13 +35,13 @@ namespace demo {
               const cv::Mat &right);
 
         Sophus::SE3d Pose() {
-          std::unique_lock<std::mutex> lck(pose_mutex_);
-          return pose_;
+            std::unique_lock<std::mutex> lck(pose_mutex_);
+            return pose_;
         }
 
         void SetPose(const Sophus::SE3d &pose) {
-          std::unique_lock<std::mutex> lck(pose_mutex_);
-          pose_ = pose;
+            std::unique_lock<std::mutex> lck(pose_mutex_);
+            pose_ = pose;
         }
 
         void SetKeyFrame();

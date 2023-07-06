@@ -9,6 +9,7 @@ namespace demo {
         double fx_ = 0, fy_ = 0, cx_ = 0, cy_ = 0, baseilne_ = 0;
         Sophus::SE3d pose_;     //pose
         Sophus::SE3d pose_inv_; //pose inverse
+        Camera(){}
         Camera(double fx, double fy, double cx, double cy, double baseline, const Sophus::SE3d &pose)
                 : fx_(fx), fy_(fy), cx_(cx), cy_(cy), baseilne_(baseline), pose_(pose) {
             pose_inv_ = pose.inverse();

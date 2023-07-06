@@ -43,24 +43,28 @@ include_directories(${GFLAGS_INCLUDE_DIRS})
 find_package(CSparse REQUIRED)
 include_directories(${CSPARSE_INCLUDE_DIR})
 
-add_library(DEMO SHARED 
-  ${PROJECT_SOURCE_DIR}/src/frame.cc 
-  ${PROJECT_SOURCE_DIR}/src/mappoint.cc 
-  ${PROJECT_SOURCE_DIR}/src/map.cc
-  ${PROJECT_SOURCE_DIR}/src/frontend.cc
-)
+add_library(DEMO SHARED
+    ${PROJECT_SOURCE_DIR}/src/camera.cc
+    ${PROJECT_SOURCE_DIR}/src/frame.cc
+    ${PROJECT_SOURCE_DIR}/src/mappoint.cc
+    ${PROJECT_SOURCE_DIR}/src/map.cc
+    ${PROJECT_SOURCE_DIR}/src/feature.cc
+
+    ${PROJECT_SOURCE_DIR}/src/config.cc
+    ${PROJECT_SOURCE_DIR}/src/dataset.cc
+    )
 
 target_link_libraries(
-  DEMO 
-  ${OpenCV_LIBS}
-  ${Sophus_LIBRARIES}
-  ${Pangolin_LIBRARIES} GL GLU GLEW 
-  g2o_core g2o_stuff g2o_types_sba g2o_solver_csparse g2o_csparse_extension
-  ${GTEST_BOTH_LIBRARIES}
-  ${GLOG_LIBRARIES}
-  ${GFLAGS_LIBRARIES}
-  pthread
-  ${CSPARSE_LIBRARY}
+    DEMO
+    ${OpenCV_LIBS}
+    ${Sophus_LIBRARIES}
+    ${Pangolin_LIBRARIES} GL GLU GLEW
+    g2o_core g2o_stuff g2o_types_sba g2o_solver_csparse g2o_csparse_extension
+    ${GTEST_BOTH_LIBRARIES}
+    ${GLOG_LIBRARIES}
+    ${GFLAGS_LIBRARIES}
+    pthread
+    ${CSPARSE_LIBRARY}
 )
 
 add_executable(runkitti ${PROJECT_SOURCE_DIR}/app/runkitti.cc)

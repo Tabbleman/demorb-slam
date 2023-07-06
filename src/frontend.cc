@@ -3,7 +3,14 @@
 #include "map.h"
 #include "opencv2/opencv.hpp"
 #include "opencv2/features2d.hpp"
-namespace demo{
+#include "config.h"
+
+namespace demo {
+    Frontend::Frontend() {
+        orb_ = cv::ORB::create();
+        num_features_init = Config::Get<int>("num_feature_init");
+    }
+
     bool Frontend::AddFrame(Frame::Ptr frame) {
         current_frame_ = frame;
         switch (status_) {
@@ -23,22 +30,22 @@ namespace demo{
     }
 
     bool Frontend::Track() {
-        if (last_frame_){
+        if (last_frame_) {
             current_frame_->SetPose(relative_motion_ * last_frame_->Pose());
         }
-        int num_track_last = TrackLastFrame();
+        int num_track_last = TrackLastFrameLK();
         tracking_inliers_ = EstimateCurrentPose();
-        if(num_track_last > num_features_tracking_good_) {
+        if (num_track_last > num_features_tracking_good_) {
             status_ = FrontendStatus::TRACKING_GOOD;
-        }else if (num_track_last > num_features_tracking_bad_){
+        } else if (num_track_last > num_features_tracking_bad_) {
             status_ = FrontendStatus::TRACKING_BAD;
-        }else {
+        } else {
             status_ = FrontendStatus::LOST;
         }
 
         InsertKeyFrame();
         relative_motion_ = current_frame_->Pose() * last_frame_->Pose();
-        if(viewer_){
+        if (viewer_) {
 
         }
         return true;
@@ -46,19 +53,19 @@ namespace demo{
     }
 
     bool Frontend::InsertKeyFrame() {
-        if(tracking_inliers_ >= num_features_needed_for_keyframes){
+        if (tracking_inliers_ >= num_features_needed_for_keyframes) {
             //enough point, doesn't need insert kf
-            return  false;
+            return false;
         }
         current_frame_->SetKeyFrame();
         map_->InsertKeyFrame(current_frame_);
 
         LOG(INFO) << "Set keyframe" << current_frame_->id_ << "as "
-         << current_frame_->keyframe_id_ ;
+                  << current_frame_->keyframe_id_;
         SetObservationsForKeyFrame();
-        DetectFeatures();
+        DetectFeaturesGFTT();
 
-        FindFeaturesInFight();
+        FindFeaturesInRight();
         TriangulateNewPoints();
 //      后端更新地图
 //      Viwer更新
@@ -66,9 +73,9 @@ namespace demo{
     }
 
     void Frontend::SetObservationsForKeyFrame() {
-        for(auto &feat: current_frame_->feature_left_){
+        for (auto &feat: current_frame_->feature_left_) {
             auto mp = feat->map_point_.lock();
-            if(mp) mp->AddObservation(feat);
+            if (mp) mp->AddObservation(feat);
         }
     }
 
@@ -76,24 +83,24 @@ namespace demo{
         std::vector<Sophus::SE3d> poses{camera_left_->Pose(), camera_right_->Pose()};
         Sophus::SE3d current_pose_Tcw = current_frame_->Pose().inverse();
         int cnt_triangulated_points = 0;
-        for(int i = 0; i < current_frame_->feature_left_.size(); i ++){
+        for (int i = 0; i < current_frame_->feature_left_.size(); i++) {
             // 左边的点没有关联mappoint并且存在右图匹配点，尝试三角化
-            if(current_frame_->feature_left_[i]->map_point_.expired() &&
-                current_frame_->feature_right_[i] != nullptr){
+            if (current_frame_->feature_left_[i]->map_point_.expired() &&
+                current_frame_->feature_right_[i] != nullptr) {
                 std::vector<Vec3> points{
-                    camera_left_->pixel2camera(
-                            Vec2(current_frame_->feature_left_[i]->position_.pt.x,
-                                 current_frame_->feature_left_[i]->position_.pt.y
-                                 )
-                            ),
-                    camera_right_->pixel2camera(
+                        camera_left_->pixel2camera(
+                                Vec2(current_frame_->feature_left_[i]->position_.pt.x,
+                                     current_frame_->feature_left_[i]->position_.pt.y
+                                )
+                        ),
+                        camera_right_->pixel2camera(
                                 Vec2(current_frame_->feature_right_[i]->position_.pt.x,
                                      current_frame_->feature_right_[i]->position_.pt.y)
-                            )
+                        )
                 };
 
                 Vec3 pworld = Vec3::Zero();
-                if(demo::triangulation(poses, points, pworld) && pworld[2] > 0){
+                if (demo::triangulation(poses, points, pworld) && pworld[2] > 0) {
                     auto new_map_point = MapPoint::CreateNewMapPoint();
                     pworld = current_pose_Tcw * pworld;
                     new_map_point->SetPos(pworld);
@@ -113,25 +120,12 @@ namespace demo{
     int Frontend::EstimateCurrentPose() {
 //        TODO
     }
+
     /**
      * 跟踪上一帧
      * @return
      */
-    int Frontend::TrackLastFrame() {
-//        std::vector<cv::Point2f> kp_last, kp_currrent;
-//        for(auto &kp: last_frame_->feature_left_){
-//            if(kp->map_point_.lock()){
-//                auto mp = kp->map_point_.lock();
-//                auto px =
-//                        camera_left_->world2pixel(mp->pos_, current_frame_->Pose());
-//                kp_last.push_back(kp->position_.pt);
-//                kp_currrent.push_back(cv::Point2f(px[0], px[1]));
-//
-//            }else {
-//                kp_last.push_back(kp->position_.pt);
-//                kp_currrent.push_back(kp->position_.pt);
-//            }
-//        }
+    int Frontend::TrackLastFrameORB() {
         //orb extractor
         //start initialization
         int num_good_pts = 0;
@@ -151,36 +145,54 @@ namespace demo{
 
         std::vector<cv::DMatch> matches;
         matcher->match(descriptor_last, descriptor_current, matches);
-        auto cmp = [](const cv::DMatch &dm1, const cv::DMatch &dm2){return dm1.distance < dm2.distance;};
+        auto cmp = [](const cv::DMatch &dm1, const cv::DMatch &dm2) { return dm1.distance < dm2.distance; };
         auto min_max = std::minmax_element(matches.begin(), matches.end(), cmp);
         double min_dist = min_max.first->distance;
         double max_dist = min_max.second->distance;
 
-        for(int i = 0; i < descriptor_current.rows; i ++){
+        for (int i = 0; i < descriptor_last.rows; i++) {
             cv::KeyPoint current_good = keypoint_current[matches[i].trainIdx];
-            if(matches[i].distance < std::max(min_dist * 2, 10.0)){
+            if (matches[i].distance < std::max(min_dist * 2, 10.0)) {
                 LOG(INFO) << "Good Match Found!";
                 demo::Feature::Ptr feature(new Feature(current_frame_, current_good));
                 feature->map_point_ = last_frame_->feature_left_[i]->map_point_;
                 current_frame_->feature_left_.push_back(feature);
-                num_good_pts ++;
+                num_good_pts++;
             }
         }
         LOG(INFO) << "Found " << num_good_pts << " Good in the last image";
         return num_good_pts;
     }
 
+    int Frontend::TrackLastFrameLK() {
+        std::vector<cv::Point2f> kp_last, kp_currrent;
+        for (auto &kp: last_frame_->feature_left_) {
+            if (kp->map_point_.lock()) {
+                auto mp = kp->map_point_.lock();
+                auto px =
+                        camera_left_->world2pixel(mp->pos_, current_frame_->Pose());
+                kp_last.push_back(kp->position_.pt);
+                kp_currrent.push_back(cv::Point2f(px[0], px[1]));
+
+            } else {
+                kp_last.push_back(kp->position_.pt);
+                kp_currrent.push_back(kp->position_.pt);
+            }
+        }
+
+    }
+
     bool Frontend::StereoInit() {
-        int num_feature_left = DetectFeatures();
+        int num_feature_left = DetectFeaturesGFTT();
         int num_coor_feature = FindFeaturesInRight();
-        if(num_coor_feature < num_features_init){
+        if (num_coor_feature < num_features_init) {
             return false;
         }
 
         bool build_map_success = BuildInitMap();
-        if(build_map_success){
+        if (build_map_success) {
             status_ = FrontendStatus::TRACKING_GOOD;
-            if(viewer_){
+            if (viewer_) {
 //                TODO
             }
             return true;
@@ -188,14 +200,40 @@ namespace demo{
         return false;
 
     }
-    int Frontend::DetectFeatures() {
 
+    int Frontend::DetectFeaturesGFTT() {
+
+    }
+
+    bool Frontend::BuildInitMap() {
+        std::vector<Sophus::SE3d> poses{
+                camera_left_->Pose(), camera_right_->Pose()
+        };
+        int cnt_init_landmarks = 0;
+        for (int i = 0; i < current_frame_->feature_left_.size(); i++) {
+            std::vector<Vec3> points{
+                    camera_left_->pixel2camera(
+                            Vec2(current_frame_->feature_left_[i]->position_.pt.x,
+                                 current_frame_->feature_left_[i]->position_.pt.y)),
+                    camera_right_->pixel2camera(Vec2(current_frame_->feature_right_[i]->position_.pt.x,
+                                                     current_frame_->feature_right_[i]->position_.pt.y))
+            };
+            std::vector<cv::KeyPoint> keypoints;
+            gftt_->detect(current_frame_->left_img_, keypoints);
+            int cnt_detected = 0;
+            for (auto &kp: keypoints) {
+                current_frame_->feature_left_.push_back(
+                        Feature::Ptr(new Feature(current_frame_, kp))
+                );
+                cnt_detected++;
+            }
+            LOG(INFO) << "Detect " << cnt_detected << " new feature";
+            return cnt_detected;
+        }
     }
 
 
     bool Frontend::Reset() {
-        map_->CleanMap();
-
         return true;
     }
 

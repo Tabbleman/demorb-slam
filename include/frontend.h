@@ -5,6 +5,7 @@
 #include "frame.h"
 #include "map.h"
 #include "utils.h"
+#include "camera.h"
 namespace demo {
     class Backend;
     class Viewer;
@@ -45,8 +46,8 @@ namespace demo {
          * Track with last frame
          * @return number if tracked point
          */
-        int TrackLastFrame();
-
+        int TrackLastFrameLK();
+        int TrackLastFrameORB();
         /**
          * estimate current pose
          * @return number of inlier
@@ -69,7 +70,9 @@ namespace demo {
          * detect features in left image;
          * @return number of features found
          */
-        int DetectFeatures();
+        int DetectFeaturesGFTT();
+        int DetectFeaturesORB();
+        int DetectFeaturesFast();
 
         /**
          * Find corresponding features in right image of current frame;
@@ -117,8 +120,9 @@ namespace demo {
         int num_features_tracking_bad_ = 20;
         int num_features_needed_for_keyframes = 0;
         //parameters
+        cv::Ptr<cv::FeatureDetector> orb_;
+        cv::Ptr<cv::GFTTDetector> gftt_;
         cv::Ptr<cv::FastFeatureDetector> ff_;
-
     };
 
 }
