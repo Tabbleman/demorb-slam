@@ -65,7 +65,7 @@ namespace demo {
         SetObservationsForKeyFrame();
         DetectFeaturesGFTT();
 
-        FindFeaturesInRight();
+        FindFeaturesInRightLK();
         TriangulateNewPoints();
 //      后端更新地图
 //      Viwer更新
@@ -179,12 +179,32 @@ namespace demo {
                 kp_currrent.push_back(kp->position_.pt);
             }
         }
+        std::vector<uchar> status;
+        cv::Mat error;
+        cv::calcOpticalFlowPyrLK(last_frame_->left_img_, current_frame_->left_img_,
+                                 kp_last, kp_currrent,
+                                 status, error, cv::Size(11, 11),
+                                 3, cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30, 0.01),
+                                 cv::OPTFLOW_FARNEBACK_GAUSSIAN
+                                 );
+        int num_good_pts = 0;
+        for(int i = 0; i < status.size(); i ++){
+            if(status[i]){
+                cv::KeyPoint kp(kp_currrent[i], 7);
+                Feature::Ptr feature(new Feature(current_frame_, kp));
+                feature->map_point_ = last_frame_->feature_left_[i]->map_point_;
+                current_frame_->feature_left_.push_back(feature);
+                num_good_pts++;
+            }
 
+        }
+        LOG(INFO) << "Good point found: " << num_good_pts ;
+        return num_good_pts;
     }
 
     bool Frontend::StereoInit() {
         int num_feature_left = DetectFeaturesGFTT();
-        int num_coor_feature = FindFeaturesInRight();
+        int num_coor_feature = FindFeaturesInRightLK();
         if (num_coor_feature < num_features_init) {
             return false;
         }
@@ -199,6 +219,17 @@ namespace demo {
         }
         return false;
 
+    }
+    /**
+     * 用fast检测特征点
+     * @return
+     */
+    int Frontend::DetectFeaturesFast() {
+//      TODO
+    }
+
+    int Frontend::DetectFeaturesORB() {
+//        TODO
     }
 
     int Frontend::DetectFeaturesGFTT() {
@@ -218,18 +249,23 @@ namespace demo {
                     camera_right_->pixel2camera(Vec2(current_frame_->feature_right_[i]->position_.pt.x,
                                                      current_frame_->feature_right_[i]->position_.pt.y))
             };
-            std::vector<cv::KeyPoint> keypoints;
-            gftt_->detect(current_frame_->left_img_, keypoints);
-            int cnt_detected = 0;
-            for (auto &kp: keypoints) {
-                current_frame_->feature_left_.push_back(
-                        Feature::Ptr(new Feature(current_frame_, kp))
-                );
-                cnt_detected++;
+            Vec3 pworld = Vec3::Zero();
+
+            if(triangulation(poses, points, pworld) && pworld[2] > 0){
+                auto new_map_point = MapPoint::CreateNewMapPoint();
+                new_map_point->SetPos(pworld);
+                new_map_point->AddObservation(current_frame_->feature_left_[i]);
+                new_map_point->AddObservation(current_frame_->feature_right_[i]);
+                cnt_init_landmarks ++;
+                map_->InsertMapPoint(new_map_point);
+
             }
-            LOG(INFO) << "Detect " << cnt_detected << " new feature";
-            return cnt_detected;
+
         }
+        current_frame_->SetKeyFrame();
+        map_->InsertKeyFrame(current_frame_);
+//        backend update
+
     }
 
 
