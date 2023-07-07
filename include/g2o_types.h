@@ -8,7 +8,8 @@
 #include "g2o/core/robust_kernel.h"
 #include "g2o/core/solver.h"
 #include "g2o/core/sparse_optimizer.h"
-
+#include "g2o/core/linear_solver.h"
+#include "g2o/solvers/csparse/linear_solver_csparse.h"
 namespace demo {
     /**
      * 位姿定点
