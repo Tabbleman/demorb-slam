@@ -1,3 +1,4 @@
+#pragma once
 #include "camera.h"
 #include "common.h"
 #include "frame.h"
@@ -8,7 +9,7 @@ namespace demo{
      class Dataset{
      public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
+        typedef std::shared_ptr<Dataset> Ptr;
         Dataset(const std::string dataset_path);
         /**
          * 数据集的初始化

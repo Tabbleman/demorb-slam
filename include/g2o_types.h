@@ -1,3 +1,4 @@
+#pragma once
 #include "common.h"
 
 #include "g2o/core/base_binary_edge.h"
@@ -10,6 +11,7 @@
 #include "g2o/core/sparse_optimizer.h"
 #include "g2o/core/linear_solver.h"
 #include "g2o/solvers/csparse/linear_solver_csparse.h"
+#include "g2o/core/robust_kernel_impl.h"
 namespace demo {
     /**
      * 位姿定点
@@ -56,7 +58,8 @@ namespace demo {
         }
 
     };
-    class EdgePoseOnly: public g2o::BaseUnaryEdge<2, Vec2, VertexPose>{
+    class EdgePoseOnly
+            : public g2o::BaseUnaryEdge<2, Vec2, VertexPose>{
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         EdgePoseOnly(const Vec3& pos, const Mat33& K)
@@ -95,7 +98,8 @@ namespace demo {
 
     };
 
-    class EdgePoseAndMap: g2o::BaseBinaryEdge<2, Vec2, VertexPose, VertexXYZ>{
+    class EdgePoseAndMap
+            : public g2o::BaseBinaryEdge<2, Vec2, VertexPose, VertexXYZ>{
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         /**
@@ -118,7 +122,7 @@ namespace demo {
         }
         virtual void linearizeOplus(g2o::JacobianWorkspace &jacobianWorkspace) override{
             const VertexPose *vertexPose = static_cast<VertexPose*>(_vertices[0]);
-            const VertexXYZ *vertexXyz = static_cast<VertexXYZ>(_vertices[1]);
+            const VertexXYZ *vertexXyz = static_cast<VertexXYZ*>(_vertices[1]);
 
             Sophus::SE3d T = vertexPose->estimate();
             Vec3 pworld = vertexXyz->estimate();

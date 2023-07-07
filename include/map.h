@@ -1,3 +1,4 @@
+#pragma once
 #ifndef DEMO_MAP_H
 #define DEMO_MAP_H
 

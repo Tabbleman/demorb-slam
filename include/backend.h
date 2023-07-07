@@ -1,3 +1,4 @@
+#pragma once
 #include "common.h"
 #include "frame.h"
 #include "map.h"
@@ -5,6 +6,7 @@
 namespace demo{
     class Map;
     class Backend{
+    public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         typedef std::shared_ptr<Backend> Ptr;
 
@@ -14,6 +16,7 @@ namespace demo{
         }
         void SetMap(Map::Ptr map){
             map_ = map;
+
         }
 
         void UpdateMap();

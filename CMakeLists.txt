@@ -44,14 +44,15 @@ find_package(CSparse REQUIRED)
 include_directories(${CSPARSE_INCLUDE_DIR})
 
 add_library(DEMO SHARED
-    ${PROJECT_SOURCE_DIR}/src/camera.cc
     ${PROJECT_SOURCE_DIR}/src/frame.cc
+    ${PROJECT_SOURCE_DIR}/src/camera.cc
     ${PROJECT_SOURCE_DIR}/src/mappoint.cc
     ${PROJECT_SOURCE_DIR}/src/map.cc
     ${PROJECT_SOURCE_DIR}/src/feature.cc
-
+    ${PROJECT_SOURCE_DIR}/src/backend.cc
     ${PROJECT_SOURCE_DIR}/src/config.cc
     ${PROJECT_SOURCE_DIR}/src/dataset.cc
+
     )
 
 target_link_libraries(

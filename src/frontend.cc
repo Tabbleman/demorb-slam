@@ -119,6 +119,7 @@ namespace demo {
 
     int Frontend::EstimateCurrentPose() {
 //        TODO
+
     }
 
     /**
@@ -265,6 +266,7 @@ namespace demo {
         current_frame_->SetKeyFrame();
         map_->InsertKeyFrame(current_frame_);
 //        backend update
+        backend_->UpdateMap();
 
     }
 

@@ -1,3 +1,4 @@
+#pragma once
 #include "common.h"
 namespace demo{
 inline bool triangulation(const std::vector<Sophus::SE3d>&poses,

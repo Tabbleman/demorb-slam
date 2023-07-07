@@ -1,11 +1,14 @@
 #pragma once
+#ifndef FRONTEND_H
+#define FRONTEND_H
 
+#include "camera.h"
 #include "common.h"
+#include "backend.h"
 #include "opencv2/features2d.hpp"
 #include "frame.h"
 #include "map.h"
 #include "utils.h"
-#include "camera.h"
 namespace demo {
     class Backend;
     class Viewer;
@@ -26,7 +29,7 @@ namespace demo {
 
         //set map
         void SetMap(Map::Ptr map) {map_ = map; }
-
+        FrontendStatus GetFrontEndStatus(){return status_; }
         void SetBackend(std::shared_ptr<Backend> backend){backend_ = backend;}
         void SetCamera(Camera::Ptr left, Camera::Ptr right){camera_left_ = left, camera_right_ = right;}
     private:
@@ -128,3 +131,4 @@ namespace demo {
     };
 
 }
+#endif
