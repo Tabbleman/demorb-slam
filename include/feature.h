@@ -3,7 +3,6 @@
 #define DEMO_FEATURE_H
 
 #include <common.h>
-
 namespace demo {
     struct Frame;
     struct MapPoint;

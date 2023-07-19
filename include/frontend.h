@@ -9,10 +9,10 @@
 #include "frame.h"
 #include "map.h"
 #include "utils.h"
+
 namespace demo {
     class Backend;
     class Viewer;
-
     enum class FrontendStatus {
         INITING, TRACKING_GOOD, TRACKING_BAD, LOST
     };
@@ -21,7 +21,6 @@ namespace demo {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         typedef std::shared_ptr<Frontend> Ptr;
-
         Frontend();
 
         //添加一帧，并确定计算定位结果
@@ -31,6 +30,7 @@ namespace demo {
         void SetMap(Map::Ptr map) {map_ = map; }
         FrontendStatus GetFrontEndStatus(){return status_; }
         void SetBackend(std::shared_ptr<Backend> backend){backend_ = backend;}
+        void SetViewer(std::shared_ptr<Viewer> viewer){viewer_ = viewer;}
         void SetCamera(Camera::Ptr left, Camera::Ptr right){camera_left_ = left, camera_right_ = right;}
     private:
         /**

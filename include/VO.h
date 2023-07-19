@@ -3,8 +3,9 @@
 #include "common.h"
 #include "frontend.h"
 #include "backend.h"
-
+#include "viewer.h"
 #include "dataset.h"
+#include "config.h"
 
 namespace demo{
     class VO{
@@ -16,13 +17,13 @@ namespace demo{
 
         void Run();
 
-        void Step();
+        bool Step();
 
         FrontendStatus GetFrontEndStatus(){return frontend_->GetFrontEndStatus();}
 
     private:
         bool init_ = false;
-
+        std::string config_file_path_;
         /**
          * vo由前端和后端组成，前端负责提取特征点，
          * 判断是否要交给后端进行优化，
@@ -33,7 +34,7 @@ namespace demo{
         Frontend::Ptr frontend_ = nullptr;
         Backend::Ptr  backend_ = nullptr;
         Map::Ptr map_ = nullptr;
-//        Viewer::Ptr viewer = nullptr;
+        Viewer::Ptr viewer_ = nullptr;
         Dataset::Ptr dataset_ = nullptr;
     };
 }

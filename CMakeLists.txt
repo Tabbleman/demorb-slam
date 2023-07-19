@@ -50,9 +50,11 @@ add_library(DEMO SHARED
     ${PROJECT_SOURCE_DIR}/src/map.cc
     ${PROJECT_SOURCE_DIR}/src/feature.cc
     ${PROJECT_SOURCE_DIR}/src/backend.cc
+    ${PROJECT_SOURCE_DIR}/src/frontend.cc
     ${PROJECT_SOURCE_DIR}/src/config.cc
     ${PROJECT_SOURCE_DIR}/src/dataset.cc
-
+    ${PROJECT_SOURCE_DIR}/src/VO.cc
+    ${PROJECT_SOURCE_DIR}/src/viewer.cc
     )
 
 target_link_libraries(

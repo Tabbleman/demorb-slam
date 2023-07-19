@@ -3,16 +3,16 @@
 #define DEMO_FRAME_H
 
 #include <common.h>
-
+#include "frame.h"
 namespace demo {
     struct MapPoint;
     struct Feature;
 
-/**
- * ding帧
- * 每一帧分配id，关键帧分配关键帧id
- *
- */
+    /**
+     * ding帧
+     * 每一帧分配id，关键帧分配关键帧id
+     *
+     */
     struct Frame {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW

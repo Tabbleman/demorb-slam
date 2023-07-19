@@ -8,7 +8,10 @@
 namespace demo {
     Frontend::Frontend() {
         orb_ = cv::ORB::create();
+        gftt_ = cv::GFTTDetector::create(Config::Get<int>("num_features"), 0.01, 20);
         num_features_init = Config::Get<int>("num_feature_init");
+        num_features_ = Config::Get<int>("num_features");
+
     }
 
     bool Frontend::AddFrame(Frame::Ptr frame) {
@@ -234,9 +237,28 @@ namespace demo {
     }
 
     int Frontend::DetectFeaturesGFTT() {
+        cv::Mat mask(current_frame_->left_img_.size(), CV_8UC1, 200);
+        for(auto &feat: current_frame_->feature_left_){
+            cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10),
+                          feat->position_.pt + cv::Point2f(10, 10), 0, CV_FILLED);
+        }
+        int cnt_detect = 0;
+        std::vector<cv::KeyPoint> keypoints;
+        gftt_->detect(current_frame_->left_img_, keypoints, mask);
+        for(auto &kp: keypoints){
+            current_frame_->feature_left_.push_back(
+                    Feature::Ptr(new Feature(current_frame_, kp))
+                    );
+            cnt_detect ++;
 
+        }
+        LOG(INFO) << "Detect " << cnt_detect << " Features";
+        return cnt_detect;
     }
 
+    int Frontend::FindFeaturesInRightLK() {
+
+    }
     bool Frontend::BuildInitMap() {
         std::vector<Sophus::SE3d> poses{
                 camera_left_->Pose(), camera_right_->Pose()
