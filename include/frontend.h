@@ -120,11 +120,11 @@ namespace demo {
         int tracking_inliers_ = 0;
 
         int num_features_ = 150;
-        int num_features_init = 0;
+        int num_features_init_ = 0;
         int num_features_tracking_good_ = 50;
         int num_features_tracking_bad_ = 20;
-        int num_features_needed_for_keyframes = 0;
-        //parameters
+        int num_features_needed_for_keyframes_ = 0;
+        //parameters, different feature extractor
         cv::Ptr<cv::FeatureDetector> orb_;
         cv::Ptr<cv::GFTTDetector> gftt_;
         cv::Ptr<cv::FastFeatureDetector> ff_;

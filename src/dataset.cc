@@ -11,7 +11,7 @@ namespace demo {
      * 读取内参和外惨
      */
     bool Dataset::Init() {
-        std::ifstream fin(dataset_path_ + "calib.txt");
+        std::ifstream fin(dataset_path_ + "/calib.txt");
         if (!fin.is_open()) {
             LOG(ERROR) << "cannot found " << dataset_path_ + "calib.txt";
             return false;

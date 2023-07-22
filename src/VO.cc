@@ -3,18 +3,18 @@
 //
 #include "VO.h"
 
-namespace demo{
+namespace demo {
     VO::VO(std::string &config_file)
-    : config_file_path_(config_file){
-
+            : config_file_path_(config_file) {
     }
 
     bool VO::Init() {
-        if(Config::SetParameterFile(config_file_path_) == false){
+        if (Config::SetParameterFile(config_file_path_) == false) {
             return false;
         }
         dataset_ = Dataset::Ptr(new Dataset(Config::Get<std::string>("dataset_dir")));
         CHECK_EQ(dataset_->Init(), true);
+        LOG(INFO) << "Dataset init successfully";
         //创建物件
         frontend_ = Frontend::Ptr(new Frontend);
         backend_ = Backend::Ptr(new Backend);
@@ -34,9 +34,9 @@ namespace demo{
     }
 
     void VO::Run() {
-        while (true){
-            LOG(INFO) << "VO is RUNNING" ;
-            if(Step() == false){
+        while (true) {
+            LOG(INFO) << "VO is RUNNING";
+            if (Step() == false) {
                 break;
             }
         }
@@ -47,12 +47,12 @@ namespace demo{
 
     bool VO::Step() {
         Frame::Ptr next_frame = dataset_->NextFrame();
-        assert(next_frame != nullptr);
+        if(next_frame == nullptr) return false;
         auto st = std::chrono::steady_clock::now();
         bool status = frontend_->AddFrame(next_frame);
         auto ed = std::chrono::steady_clock::now();
         auto delta = std::chrono::duration_cast<std::chrono::duration<double>>(ed - st);
-        LOG(INFO) << "VO COST " <<delta.count();
+        LOG(INFO) << "VO COST " << delta.count();
         return status;
     }
 }
