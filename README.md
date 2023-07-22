@@ -18,7 +18,6 @@
 
 ## 如何构建本项目？
 ```bash
-
 chmod a+x build.sh
 ./build.sh
 ```
